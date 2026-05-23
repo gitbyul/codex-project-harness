@@ -49,23 +49,59 @@
 harness:
   source: /Users/abyul/Desktop/project/codex-project-harness
   version: local
+  ci:
+    mode: local_path
+    repository: ""
+    ref: main
 
 modules:
   scripts: true
   githooks: true
-  github_workflows: true
+  github_workflows: false
   generic_pm_skills: true
   docs_templates: false
 
 project:
   name: example-project
-  code_root: backend
-  verify_command: ./scripts/verify.sh
+  code_root: ""
+  verify_command: ""
+
+architecture:
+  python_source_roots: []
+  forbidden_globals: []
+  forbidden_route_calls: []
+
+artifacts:
+  required: true
+  blocked_staged_suffixes:
+    - .png
+    - .jpg
+    - .mp4
+    - .onnx
 
 local_overrides:
   skills:
     - project-specific-skill
 ```
+
+`modules` 값은 `installer/update.sh`가 실제로 반영한다. 예를 들어 `github_workflows: false`면 `.github/workflows/verify.yml`을 생성하지 않고, `docs_templates: true`일 때만 중앙 문서 템플릿을 복사한다.
+
+GitHub-hosted runner는 로컬 절대 경로의 중앙 하네스를 볼 수 없다. GitHub Actions를 쓰려면 중앙 하네스 저장소를 체크아웃하도록 설정한다.
+
+```yaml
+harness:
+  source: /Users/abyul/Desktop/project/codex-project-harness
+  version: local
+  ci:
+    mode: checkout
+    repository: owner/codex-project-harness
+    ref: main
+
+modules:
+  github_workflows: true
+```
+
+`ci.mode: local_path`는 self-hosted runner처럼 `harness.source` 경로가 실제로 존재하는 환경에서만 사용한다.
 
 `docs_templates`는 기본적으로 `false`를 권장한다. 프로젝트 문서는 도메인별 수정이 많기 때문에 중앙 템플릿으로 무조건 덮어쓰지 않는다.
 
@@ -82,11 +118,11 @@ codex-project-harness
 
 공통 스킬이나 하네스 스크립트를 바꿀 때는 이 저장소에서만 수정한다. 이후 각 프로젝트에서 `installer/update.sh`를 실행해 wrapper/config만 갱신한다.
 
-프로젝트별 수정은 각 프로젝트의 별도 파일에 둔다. 예를 들어 RVC 프로젝트 전용 스킬은 프로젝트의 `.codex/skills/rvc-*` 아래에 둔다. 범용 PM 스킬은 프로젝트에 복사하지 않는다.
+프로젝트별 수정은 각 프로젝트의 별도 파일에 둔다. 예를 들어 특정 도메인 전용 스킬은 프로젝트의 `.codex/skills/<domain>-*` 아래에 둔다. 범용 PM 스킬 원본은 중앙 저장소에 두고, 소비 프로젝트에는 중앙 원본을 가리키는 얇은 wrapper만 생성한다.
 
 ## 프로젝트별 검증 확장
 
-중앙 `harness/scripts/verify.sh`는 공통 하네스 검사만 실행한다. 제품 도메인 문서, 코드 테스트, 런타임 검증처럼 프로젝트마다 다른 검사는 각 프로젝트의 `scripts/project_verify.sh`에 둔다.
+중앙 `harness/scripts/verify.sh`는 공통 하네스 검사만 실행한다. 제품 도메인 문서, 코드 테스트, 런타임 검증처럼 프로젝트마다 다른 검사는 `.codex-harness.yml`의 `project.verify_command`에 둔다. 기존 프로젝트 호환을 위해 `scripts/project_verify.sh`도 계속 지원한다.
 
 예시:
 
@@ -97,13 +133,22 @@ set -euo pipefail
 python3 scripts/validate_docs.py
 python3 scripts/check_project_docs.py
 
-(
-  cd backend
-  python3 -m pytest
-)
+python3 -m pytest
 ```
 
-`installer/update.sh`는 중앙 호출 wrapper만 생성하므로 프로젝트별 `scripts/project_verify.sh`와 프로젝트 전용 검사 스크립트는 보존된다.
+`installer/update.sh`는 중앙 호출 wrapper와 선택된 모듈만 생성하므로 프로젝트별 검사 스크립트는 보존된다.
+
+아키텍처 검사는 기본적으로 도메인 중립이며, 프로젝트가 필요할 때만 설정으로 켠다.
+
+```yaml
+architecture:
+  python_source_roots:
+    - src
+  forbidden_globals:
+    - mutable_runtime
+  forbidden_route_calls:
+    - direct_runtime_call
+```
 
 ## 수정 보호 규칙
 
@@ -144,6 +189,8 @@ python3 scripts/check_project_docs.py
 ```bash
 /Users/abyul/Desktop/project/codex-project-harness/installer/validate.sh
 ```
+
+검증은 쉘/Python 문법 검사와 임시 Git 프로젝트에 대한 설치 smoke test를 함께 실행한다.
 
 프로젝트에 설치한 뒤에는 프로젝트 루트에서 실행한다.
 

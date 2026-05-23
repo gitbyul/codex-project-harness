@@ -8,11 +8,13 @@ This document explains the shared generic PM skills installed from `codex-projec
 - Project-local skills: `.codex/skills/`
 - Project harness config: `.codex-harness.yml`
 
-Update shared skills from the central harness:
+Update shared skill wrappers from the central harness:
 
 ```bash
 /Users/abyul/Desktop/project/codex-project-harness/installer/update.sh .
 ```
+
+The shared PM skill source remains in the central harness. Project-local generic PM skill files under `.codex/skills/` are wrappers that point agents back to the central source.
 
 ## Generic PM Skills
 

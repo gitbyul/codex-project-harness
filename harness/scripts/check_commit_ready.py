@@ -3,11 +3,17 @@ from __future__ import annotations
 
 import os
 import subprocess
+import sys
 from datetime import UTC, datetime
 from fnmatch import fnmatch
 from pathlib import Path
+from typing import Any
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from harness_config import get_path, parse_config  # noqa: E402
 
 ROOT = Path(os.environ.get("HARNESS_PROJECT_ROOT", Path(__file__).resolve().parents[1])).resolve()
+CONFIG = parse_config(ROOT / ".codex-harness.yml")
 MAIN_BRANCHES = {"main", "master"}
 
 
@@ -74,6 +80,17 @@ def record_bypass(reason: str) -> None:
     timestamp = datetime.now(UTC).isoformat()
     branch = current_branch() or "DETACHED"
     log_path.open("a", encoding="utf-8").write(f"{timestamp}\t{branch}\t{reason}\n")
+
+
+def config_bool(path: str, default: bool) -> bool:
+    value: Any = get_path(CONFIG, path)
+    if value in {"true", "True"}:
+        return True
+    if value in {"false", "False"}:
+        return False
+    if isinstance(value, bool):
+        return value
+    return default
 
 
 def section_lines(body: str, headings: tuple[str, ...]) -> list[str]:
@@ -210,8 +227,9 @@ def main() -> int:
         record_bypass(bypass_reason())
 
     script_dir = Path(__file__).resolve().parent
-    subprocess.check_call(["python3", str(script_dir / "check_git_hooks.py"), "--installed"], cwd=ROOT)
-    subprocess.check_call(["./scripts/verify.sh"], cwd=ROOT)
+    if config_bool("modules.githooks", True):
+        subprocess.check_call(["python3", str(script_dir / "check_git_hooks.py"), "--installed"], cwd=ROOT)
+    subprocess.check_call([str(script_dir / "verify.sh")], cwd=ROOT)
     print("commit readiness validation passed")
     return 0
 

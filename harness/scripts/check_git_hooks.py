@@ -4,10 +4,27 @@ from __future__ import annotations
 import os
 import argparse
 import subprocess
+import sys
 from pathlib import Path
+from typing import Any
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from harness_config import get_path, parse_config  # noqa: E402
 
 ROOT = Path(os.environ.get("HARNESS_PROJECT_ROOT", Path(__file__).resolve().parents[1])).resolve()
+CONFIG = parse_config(ROOT / ".codex-harness.yml")
 HOOKS = ("pre-commit", "commit-msg")
+
+
+def config_bool(path: str, default: bool) -> bool:
+    value: Any = get_path(CONFIG, path)
+    if value in {"true", "True"}:
+        return True
+    if value in {"false", "False"}:
+        return False
+    if isinstance(value, bool):
+        return value
+    return default
 
 
 def git_dir() -> Path:
@@ -62,6 +79,10 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Git hook 하네스 검증")
     parser.add_argument("--installed", action="store_true", help="로컬 .git/hooks 설치 상태까지 검사")
     args = parser.parse_args()
+
+    if not config_bool("modules.githooks", True):
+        print("git hook validation skipped: modules.githooks=false")
+        return 0
 
     errors: list[str] = []
     check_templates(errors)

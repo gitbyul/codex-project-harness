@@ -3,9 +3,15 @@ from __future__ import annotations
 
 import os
 import subprocess
+import sys
 from pathlib import Path
+from typing import Any
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from harness_config import get_path, parse_config  # noqa: E402
 
 ROOT = Path(os.environ.get("HARNESS_PROJECT_ROOT", Path(__file__).resolve().parents[1])).resolve()
+CONFIG = parse_config(ROOT / ".codex-harness.yml")
 RUNS_DIR = ROOT / "artifacts/runs"
 PLAN_DIRS = [ROOT / "docs/exec-plans/active", ROOT / "docs/exec-plans/completed"]
 REQUIRED_RUN_SECTIONS = [
@@ -21,27 +27,22 @@ REQUIRED_RUN_SECTIONS = [
     "남은 이슈",
     "민감 정보 점검",
 ]
-BLOCKED_STAGED_SUFFIXES = {
-    ".wav",
-    ".mp3",
-    ".flac",
-    ".ogg",
-    ".m4a",
-    ".png",
-    ".jpg",
-    ".jpeg",
-    ".gif",
-    ".webp",
-    ".mp4",
-    ".mov",
-    ".avi",
-    ".onnx",
-    ".pt",
-    ".pth",
-    ".ckpt",
-    ".safetensors",
-    ".bin",
-}
+
+def as_list(value: Any) -> list[str]:
+    if isinstance(value, list):
+        return [str(item) for item in value if str(item)]
+    if isinstance(value, str) and value:
+        return [item.strip() for item in value.split(",") if item.strip()]
+    return []
+
+
+def artifacts_required() -> bool:
+    value = get_path(CONFIG, "artifacts.required")
+    return value is not False and value != "false"
+
+
+def blocked_staged_suffixes() -> set[str]:
+    return {suffix.lower() for suffix in as_list(get_path(CONFIG, "artifacts.blocked_staged_suffixes"))}
 
 
 def staged_files() -> list[str]:
@@ -86,8 +87,11 @@ def artifact_refs(body: str) -> list[str]:
 
 
 def check_run_files(errors: list[str]) -> None:
+    if not artifacts_required():
+        return
     if not RUNS_DIR.exists():
-        errors.append("artifacts/runs 디렉터리가 없습니다.")
+        if any(plan_dir.exists() and list(plan_dir.glob("*.md")) for plan_dir in PLAN_DIRS):
+            errors.append("artifacts/runs 디렉터리가 없습니다.")
         return
 
     for run_file in sorted(RUNS_DIR.glob("*/run.md")):
@@ -98,6 +102,8 @@ def check_run_files(errors: list[str]) -> None:
 
 
 def check_plan_artifact_refs(errors: list[str]) -> None:
+    if not artifacts_required():
+        return
     for plan_dir in PLAN_DIRS:
         if not plan_dir.exists():
             continue
@@ -117,9 +123,10 @@ def check_plan_artifact_refs(errors: list[str]) -> None:
 
 
 def check_blocked_staged_files(errors: list[str]) -> None:
+    blocked_suffixes = blocked_staged_suffixes()
     for file in staged_files():
         suffix = Path(file).suffix.lower()
-        if suffix in BLOCKED_STAGED_SUFFIXES:
+        if suffix in blocked_suffixes:
             errors.append(f"민감/대용량 가능성이 있는 파일은 Git에 직접 커밋하지 않습니다: {file}")
 
 

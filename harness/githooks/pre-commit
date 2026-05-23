@@ -4,5 +4,7 @@ set -euo pipefail
 repo_root="$(git rev-parse --show-toplevel)"
 cd "$repo_root"
 export HARNESS_PROJECT_ROOT="$repo_root"
+hook_dir="$(cd "$(dirname "$0")" && pwd)"
+harness_root="${HARNESS_ROOT:-$(cd "$hook_dir/../.." && pwd)}"
 
-python3 /Users/abyul/Desktop/project/codex-project-harness/harness/scripts/check_commit_ready.py
+python3 "$harness_root/harness/scripts/check_commit_ready.py"

@@ -33,7 +33,8 @@ def main() -> int:
             file.write(message)
             path = Path(file.name)
         try:
-            subprocess.check_call(["python3", "scripts/check_commit_message.py", str(path)], cwd=ROOT)
+            script_dir = Path(__file__).resolve().parent
+            subprocess.check_call(["python3", str(script_dir / "check_commit_message.py"), str(path)], cwd=ROOT)
         finally:
             path.unlink(missing_ok=True)
 

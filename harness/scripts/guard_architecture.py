@@ -1,12 +1,19 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import os
 import ast
+import os
+import sys
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from harness_config import get_path, parse_config  # noqa: E402
+
 
 ROOT = Path(os.environ.get("HARNESS_PROJECT_ROOT", Path(__file__).resolve().parents[1])).resolve()
+CONFIG = parse_config(ROOT / ".codex-harness.yml")
 
 
 @dataclass
@@ -21,23 +28,28 @@ class Finding:
         return f"{self.severity}: {relative}:{self.line}: {self.message}"
 
 
-class MainVisitor(ast.NodeVisitor):
-    def __init__(self, path: Path) -> None:
+def as_list(value: Any) -> list[str]:
+    if isinstance(value, list):
+        return [str(item) for item in value if str(item)]
+    if isinstance(value, str) and value:
+        return [item.strip() for item in value.split(",") if item.strip()]
+    return []
+
+
+class ArchitectureVisitor(ast.NodeVisitor):
+    def __init__(self, path: Path, forbidden_globals: set[str], forbidden_route_calls: set[str]) -> None:
         self.path = path
         self.findings: list[Finding] = []
+        self.forbidden_globals = forbidden_globals
+        self.forbidden_route_calls = forbidden_route_calls
         self._route_depth = 0
-        self._except_depth = 0
 
     def visit_Global(self, node: ast.Global) -> None:
-        if "model_engine" in node.names:
-            self.findings.append(
-                Finding(
-                    "WARN",
-                    self.path,
-                    node.lineno,
-                    "global model engine is POC debt; move engine access behind an adapter",
+        for name in node.names:
+            if name in self.forbidden_globals:
+                self.findings.append(
+                    Finding("WARN", self.path, node.lineno, f"forbidden global in architecture guard: {name}")
                 )
-            )
         self.generic_visit(node)
 
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
@@ -56,21 +68,17 @@ class MainVisitor(ast.NodeVisitor):
             self.generic_visit(node)
 
     def visit_Call(self, node: ast.Call) -> None:
-        if self._route_depth and isinstance(node.func, ast.Attribute) and node.func.attr == "synthesize":
+        call_name = self._call_name(node.func)
+        if self._route_depth and call_name in self.forbidden_route_calls:
             self.findings.append(
                 Finding(
                     "WARN",
                     self.path,
                     node.lineno,
-                    "interface layer calls model runtime directly; target architecture uses application/runtime boundaries",
+                    f"forbidden route-level call in architecture guard: {call_name}",
                 )
             )
         self.generic_visit(node)
-
-    def visit_ExceptHandler(self, node: ast.ExceptHandler) -> None:
-        self._except_depth += 1
-        self.generic_visit(node)
-        self._except_depth -= 1
 
     @staticmethod
     def _decorator_mentions_http_method(node: ast.expr) -> bool:
@@ -79,26 +87,37 @@ class MainVisitor(ast.NodeVisitor):
         func = node.func
         return isinstance(func, ast.Attribute) and func.attr in {"get", "post", "put", "patch", "delete"}
 
-def source_files() -> list[Path]:
-    backend_src = ROOT / "backend" / "src"
-    if backend_src.is_dir():
-        return sorted(backend_src.rglob("*.py"))
+    @staticmethod
+    def _call_name(node: ast.expr) -> str:
+        if isinstance(node, ast.Name):
+            return node.id
+        if isinstance(node, ast.Attribute):
+            return node.attr
+        return ""
 
-    ignored_roots = {"scripts", "tests"}
+
+def source_files() -> list[Path]:
+    configured_roots = as_list(get_path(CONFIG, "architecture.python_source_roots"))
+    roots = [ROOT / path for path in configured_roots] if configured_roots else []
     files: list[Path] = []
-    for path in ROOT.rglob("*.py"):
-        relative = path.relative_to(ROOT)
-        if relative.parts and relative.parts[0] in ignored_roots:
-            continue
-        files.append(path)
-    return sorted(files)
+    for source_root in roots:
+        if source_root.is_file() and source_root.suffix == ".py":
+            files.append(source_root)
+        elif source_root.is_dir():
+            files.extend(source_root.rglob("*.py"))
+    return sorted(path.resolve() for path in files if path.exists())
 
 
 def check_source_files() -> list[Finding]:
+    forbidden_globals = set(as_list(get_path(CONFIG, "architecture.forbidden_globals")))
+    forbidden_route_calls = set(as_list(get_path(CONFIG, "architecture.forbidden_route_calls")))
+    if not forbidden_globals and not forbidden_route_calls:
+        return []
+
     findings: list[Finding] = []
     for path in source_files():
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
-        visitor = MainVisitor(path)
+        visitor = ArchitectureVisitor(path, forbidden_globals, forbidden_route_calls)
         visitor.visit(tree)
         findings.extend(visitor.findings)
     return findings

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.0
+
+- Block direct `harness_commit.sh` use by default so agents do not stop after
+  commit while leaving push, PR, merge, branch cleanup, or worktree cleanup undone.
+- Require `HARNESS_ALLOW_DIRECT_COMMIT=1` with `HARNESS_BYPASS_REASON` for explicit
+  commit-only exceptions.
+- Let higher-level finish/publish commands call the low-level commit command through
+  `HARNESS_INTERNAL_COMMIT=1`.
+
 ## 0.3.0
 
 - Add CLI-first publish flow wrappers for consuming projects:

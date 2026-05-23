@@ -46,6 +46,8 @@ Use the installed project wrappers for implementation work:
 
 The workflow creates an execution plan, records a run artifact, verifies the project, commits through the harness checks, merges into the main branch, and removes the merged branch/source worktree when possible.
 
+Do not use `harness_commit.sh` as the normal completion command. It is a low-level internal command and is blocked by default because commit-only work leaves push, PR, merge, branch cleanup, or worktree cleanup unfinished. Use `finish_codex_worktree_task.sh`, `finish_codex_pr_task.sh`, or `harness_publish.sh`.
+
 For remote publication and PR-based delivery, use the CLI wrappers instead of relying on agent-only skills:
 
 ```bash

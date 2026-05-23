@@ -51,7 +51,7 @@ else
 fi
 
 git add -A
-"$HARNESS_SCRIPT_DIR/harness_commit.sh" "$message"
+HARNESS_INTERNAL_COMMIT=1 "$HARNESS_SCRIPT_DIR/harness_commit.sh" "$message"
 "$HARNESS_SCRIPT_DIR/harness_merge.sh" "$branch" "$main_branch"
 
 echo "finished, committed, and merged: $branch -> $main_branch"

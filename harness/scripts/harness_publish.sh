@@ -69,7 +69,7 @@ if [ "$dry_run" = "true" ]; then
 fi
 
 git add -A
-"$HARNESS_SCRIPT_DIR/harness_commit.sh" "$message"
+HARNESS_INTERNAL_COMMIT=1 "$HARNESS_SCRIPT_DIR/harness_commit.sh" "$message"
 
 if [ "$mode" = "pr" ]; then
   "$HARNESS_SCRIPT_DIR/open_pr.sh" --base "$base" --remote "$remote"

@@ -41,6 +41,11 @@ test -f "$project/.codex/skills/prd-development/SKILL.md"
   test -d docs/exec-plans/completed
   test -z "$(find docs/exec-plans/active -maxdepth 1 -type f -name '*.md' -print)"
   test -n "$(find docs/exec-plans/completed -maxdepth 1 -type f -name '*.md' -print -quit)"
+  if ./scripts/harness_commit.sh "feat(smoke): 직접 커밋 차단" >/tmp/harness-direct-commit.out 2>&1; then
+    echo "direct harness_commit should be blocked"
+    exit 1
+  fi
+  grep -q "direct harness_commit is blocked" /tmp/harness-direct-commit.out
   ./scripts/harness_publish.sh "feat(smoke): 스모크 검증" --dry-run
 )
 

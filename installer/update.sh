@@ -12,39 +12,87 @@ if [ "$target_root" = "$harness_root" ]; then
   exit 1
 fi
 
-copy_dir() {
-  local source_dir="$1"
-  local target_dir="$2"
-  mkdir -p "$target_dir"
-  rsync -a "$source_dir"/ "$target_dir"/
-}
-
-copy_file() {
-  local source_file="$1"
-  local target_file="$2"
-  mkdir -p "$(dirname "$target_file")"
-  cp "$source_file" "$target_file"
-}
-
 if [ ! -f "$target_root/.codex-harness.yml" ]; then
   echo "Missing .codex-harness.yml in $target_root"
   echo "Run installer/install.sh first or create the config from templates/.codex-harness.yml."
   exit 1
 fi
 
-copy_dir "$harness_root/harness/scripts" "$target_root/scripts"
-copy_dir "$harness_root/harness/githooks" "$target_root/githooks"
-copy_file "$harness_root/harness/github-workflows/verify.yml" "$target_root/.github/workflows/verify.yml"
+mkdir -p "$target_root/scripts" "$target_root/githooks" "$target_root/.github/workflows"
 
-mkdir -p "$target_root/.codex/skills"
-for skill_dir in "$harness_root"/skills/generic-pm/*; do
-  [ -d "$skill_dir" ] || continue
-  skill_name="$(basename "$skill_dir")"
-  copy_dir "$skill_dir" "$target_root/.codex/skills/$skill_name"
-done
+cat > "$target_root/scripts/verify.sh" <<WRAPPER
+#!/usr/bin/env bash
+set -euo pipefail
 
-if grep -q "docs_templates: true" "$target_root/.codex-harness.yml"; then
-  copy_dir "$harness_root/templates/docs" "$target_root/docs"
-fi
+repo_root="\$(cd "\$(dirname "\$0")/.." && pwd)"
+harness_root="$harness_root"
 
-echo "Updated shared Codex harness files in $target_root"
+HARNESS_PROJECT_ROOT="\$repo_root" "\$harness_root/harness/scripts/verify.sh"
+WRAPPER
+
+cat > "$target_root/scripts/harness_commit.sh" <<WRAPPER
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="\$(cd "\$(dirname "\$0")/.." && pwd)"
+harness_root="$harness_root"
+
+HARNESS_PROJECT_ROOT="\$repo_root" "\$harness_root/harness/scripts/harness_commit.sh" "\$@"
+WRAPPER
+
+cat > "$target_root/githooks/pre-commit" <<WRAPPER
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="\$(git rev-parse --show-toplevel)"
+harness_root="$harness_root"
+
+HARNESS_PROJECT_ROOT="\$repo_root" "\$harness_root/harness/githooks/pre-commit"
+WRAPPER
+
+cat > "$target_root/githooks/commit-msg" <<WRAPPER
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="\$(git rev-parse --show-toplevel)"
+harness_root="$harness_root"
+
+HARNESS_PROJECT_ROOT="\$repo_root" "\$harness_root/harness/githooks/commit-msg" "\$@"
+WRAPPER
+
+cat > "$target_root/.github/workflows/verify.yml" <<WRAPPER
+name: verify
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --upgrade pip
+      - name: Check shared harness availability
+        run: test -x "$harness_root/harness/scripts/verify.sh"
+      - run: ./scripts/verify.sh
+      - name: Validate commit messages
+        if: github.event_name == 'pull_request'
+        run: HARNESS_PROJECT_ROOT="\$PWD" python3 "$harness_root/harness/scripts/check_commit_range.py" --base origin/\${{ github.base_ref }} --head HEAD
+      - name: Validate PR execution plan
+        if: github.event_name == 'pull_request'
+        run: HARNESS_PROJECT_ROOT="\$PWD" python3 "$harness_root/harness/scripts/check_pr_plan.py" --base origin/\${{ github.base_ref }} --branch HEAD
+      - name: Validate independent test handoff
+        if: github.event_name == 'pull_request'
+        run: HARNESS_PROJECT_ROOT="\$PWD" python3 "$harness_root/harness/scripts/check_test_handoff.py" --base origin/\${{ github.base_ref }} --branch HEAD
+WRAPPER
+
+chmod +x "$target_root/scripts/verify.sh" \
+  "$target_root/scripts/harness_commit.sh" \
+  "$target_root/githooks/pre-commit" \
+  "$target_root/githooks/commit-msg"
+
+echo "Updated shared Codex harness wrappers in $target_root"

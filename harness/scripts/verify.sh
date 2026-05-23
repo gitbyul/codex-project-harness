@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd "$(dirname "$0")/.."
+HARNESS_SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+HARNESS_ROOT="$(cd "$HARNESS_SCRIPT_DIR/../.." && pwd)"
+PROJECT_ROOT="${HARNESS_PROJECT_ROOT:-$(pwd)}"
+cd "$PROJECT_ROOT"
 
 PYTHON_BIN="${PYTHON:-python3}"
 if [ -z "${PYTHON:-}" ] && [ -x ".venv/bin/python" ]; then
@@ -12,12 +15,14 @@ case "$PYTHON_BIN" in
   *) PYTHON_BIN_ABS="$PWD/$PYTHON_BIN" ;;
 esac
 
-"$PYTHON_BIN" -m py_compile scripts/*.py
-"$PYTHON_BIN" scripts/guard_architecture.py
-"$PYTHON_BIN" scripts/check_exec_plans.py
-"$PYTHON_BIN" scripts/check_artifacts.py
-"$PYTHON_BIN" scripts/check_secrets.py
-"$PYTHON_BIN" scripts/check_git_hooks.py
+export HARNESS_PROJECT_ROOT="$PROJECT_ROOT"
+
+"$PYTHON_BIN" -m py_compile "$HARNESS_SCRIPT_DIR"/*.py
+"$PYTHON_BIN" "$HARNESS_SCRIPT_DIR/guard_architecture.py"
+"$PYTHON_BIN" "$HARNESS_SCRIPT_DIR/check_exec_plans.py"
+"$PYTHON_BIN" "$HARNESS_SCRIPT_DIR/check_artifacts.py"
+"$PYTHON_BIN" "$HARNESS_SCRIPT_DIR/check_secrets.py"
+"$PYTHON_BIN" "$HARNESS_SCRIPT_DIR/check_git_hooks.py"
 
 if [ -x "scripts/project_verify.sh" ]; then
   PYTHON="$PYTHON_BIN_ABS" scripts/project_verify.sh

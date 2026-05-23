@@ -7,7 +7,7 @@ from datetime import UTC, datetime
 from fnmatch import fnmatch
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(os.environ.get("HARNESS_PROJECT_ROOT", Path(__file__).resolve().parents[1])).resolve()
 MAIN_BRANCHES = {"main", "master"}
 
 
@@ -209,7 +209,8 @@ def main() -> int:
     if bypass_requested():
         record_bypass(bypass_reason())
 
-    subprocess.check_call(["python3", "scripts/check_git_hooks.py", "--installed"], cwd=ROOT)
+    script_dir = Path(__file__).resolve().parent
+    subprocess.check_call(["python3", str(script_dir / "check_git_hooks.py"), "--installed"], cwd=ROOT)
     subprocess.check_call(["./scripts/verify.sh"], cwd=ROOT)
     print("commit readiness validation passed")
     return 0

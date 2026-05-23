@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import os
 import subprocess
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(os.environ.get("HARNESS_PROJECT_ROOT", Path(__file__).resolve().parents[1])).resolve()
 RUNS_DIR = ROOT / "artifacts/runs"
 PLAN_DIRS = [ROOT / "docs/exec-plans/active", ROOT / "docs/exec-plans/completed"]
 REQUIRED_RUN_SECTIONS = [

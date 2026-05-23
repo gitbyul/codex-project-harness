@@ -1,6 +1,6 @@
 harness:
   source: /path/to/codex-project-harness
-  version: 0.5.0
+  version: 0.6.0
   ci:
     # local_path is for self-hosted runners that have harness.source.
     # Use checkout with repository/ref for GitHub-hosted runners.

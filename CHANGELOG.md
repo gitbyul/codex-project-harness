@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0
+
+- Make `harness_status.sh --check` validate local Git hook installation, including
+  `core.hooksPath=githooks` when hook management is enabled.
+- Document runtime/tool dependencies and GitHub branch protection requirements for
+  consuming projects.
+
 ## 0.5.0
 
 - Ensure initial Git repositories use `main` as the local primary branch during

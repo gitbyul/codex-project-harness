@@ -33,6 +33,12 @@ test -f "$project/.codex/skills/prd-development/SKILL.md"
 
 (
   cd "$project"
+  if ./scripts/harness_status.sh --check >/tmp/harness-status-before-hooks.out 2>&1; then
+    echo "harness_status should fail before hook installation"
+    exit 1
+  fi
+  grep -q "core.hooksPath" /tmp/harness-status-before-hooks.out
+  ./scripts/install_git_hooks.sh
   ./scripts/harness_status.sh --check
   test "$(git symbolic-ref --quiet --short HEAD)" = "main"
   ./scripts/ensure_main_branch.sh
@@ -52,6 +58,25 @@ test -f "$project/.codex/skills/prd-development/SKILL.md"
   fi
   grep -q "direct harness_commit is blocked" /tmp/harness-direct-commit.out
   ./scripts/harness_publish.sh "feat(smoke): 스모크 검증" --dry-run
+)
+
+(
+  cd "$project"
+  mv scripts/install_git_hooks.sh scripts/install_git_hooks.sh.bak
+  if ./scripts/harness_status.sh --check >/tmp/harness-status-missing-wrapper.out 2>&1; then
+    echo "harness_status should fail when a managed wrapper is missing"
+    exit 1
+  fi
+  grep -q "scripts/install_git_hooks.sh" /tmp/harness-status-missing-wrapper.out
+  mv scripts/install_git_hooks.sh.bak scripts/install_git_hooks.sh
+
+  printf '#!/usr/bin/env bash\nexit 0\n' > githooks/pre-commit
+  chmod +x githooks/pre-commit
+  if ./scripts/harness_status.sh --check >/tmp/harness-status-corrupt-hook.out 2>&1; then
+    echo "harness_status should fail when hook content is not managed"
+    exit 1
+  fi
+  grep -q "hook wrapper content is not managed" /tmp/harness-status-corrupt-hook.out
 )
 
 python3 "$harness_root/harness/scripts/harness_config.py" \

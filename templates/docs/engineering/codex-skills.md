@@ -72,9 +72,12 @@ For new repositories, install/update/bootstrap keeps the local primary branch on
 Check the installed shared harness version and managed file coverage:
 
 ```bash
+./scripts/install_git_hooks.sh
 ./scripts/harness_status.sh
 ./scripts/harness_status.sh --check
 ```
+
+`harness_status.sh --check` also verifies hook installation when `modules.githooks` is enabled.
 
 ## Project-Specific Skills
 

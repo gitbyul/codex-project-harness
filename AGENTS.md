@@ -26,6 +26,7 @@ This directory is the central source for shared Codex harness engineering and ge
 - For remote delivery from a consuming project, prefer installed CLI wrappers such as `harness_publish.sh`, `harness_push.sh`, `finish_codex_pr_task.sh`, `open_pr.sh`, and `squash_merge_pr.sh` over plugin-only or skill-only flows.
 - Install/update/bootstrap must preserve the convention that new or initial repositories use `main` as the local primary branch. Existing non-initial project branch policies must not be renamed destructively.
 - Keep GitHub CLI setup available as an installed wrapper (`install_github_cli.sh`) with a dry-run mode; do not make network/package-manager installation mandatory during ordinary harness install.
+- Keep local hook enforcement, CI checks, and branch protection documentation aligned when commit rules change.
 - If manual Git commands are used because the workflow itself is being repaired, record the reason in the execution plan or final response.
 
 ## Validation

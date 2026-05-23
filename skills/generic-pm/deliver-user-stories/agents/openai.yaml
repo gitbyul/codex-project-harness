@@ -1,0 +1,4 @@
+interface:
+  display_name: "Deliver User Stories"
+  short_description: "Generate stories and acceptance criteria."
+  default_prompt: "Use $deliver-user-stories to break product requirements into user stories with testable acceptance criteria."

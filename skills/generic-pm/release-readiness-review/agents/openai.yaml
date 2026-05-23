@@ -1,0 +1,4 @@
+interface:
+  display_name: "Release Readiness Review"
+  short_description: "Check go/no-go release readiness."
+  default_prompt: "Use $release-readiness-review to assess whether a feature, milestone, or MVP is ready to ship and identify blockers, risks, and follow-ups."

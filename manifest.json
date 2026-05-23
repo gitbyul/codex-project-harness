@@ -1,0 +1,20 @@
+{
+  "name": "codex-project-harness",
+  "version": "0.1.0",
+  "description": "Shared Codex harness engineering and generic PM skills.",
+  "managed_modules": {
+    "scripts": "harness/scripts",
+    "githooks": "harness/githooks",
+    "github_workflows": "harness/github-workflows",
+    "generic_pm_skills": "skills/generic-pm",
+    "docs_templates": "templates"
+  },
+  "generic_pm_skills": [
+    "product-discovery-synthesis",
+    "prd-development",
+    "deliver-user-stories",
+    "roadmap-prioritization",
+    "release-readiness-review",
+    "stakeholder-status-update"
+  ]
+}

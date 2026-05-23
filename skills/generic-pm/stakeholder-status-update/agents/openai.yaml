@@ -1,0 +1,4 @@
+interface:
+  display_name: "Stakeholder Status Update"
+  short_description: "Write concise PM status and decision updates."
+  default_prompt: "Use $stakeholder-status-update to turn plans, progress, blockers, and validation results into a concise stakeholder update or decision summary."

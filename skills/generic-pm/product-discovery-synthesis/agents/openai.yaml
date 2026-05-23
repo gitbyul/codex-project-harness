@@ -1,0 +1,4 @@
+interface:
+  display_name: "Product Discovery Synthesis"
+  short_description: "Synthesize research into PM decisions."
+  default_prompt: "Use $product-discovery-synthesis to turn discovery notes, feedback, or research into problem themes, assumptions, opportunities, and next PM decisions."

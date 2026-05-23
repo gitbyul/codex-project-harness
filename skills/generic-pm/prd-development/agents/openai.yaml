@@ -1,0 +1,4 @@
+interface:
+  display_name: "PRD Development"
+  short_description: "Build PRDs for engineering handoff."
+  default_prompt: "Use $prd-development to create or improve a PRD from product notes, requirements, and current project context."

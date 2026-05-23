@@ -29,6 +29,8 @@ fi
 
 eval "$("$harness_root/harness/scripts/harness_config.py" --config "$config_file" --shell)"
 
+HARNESS_PROJECT_ROOT="$target_root" "$harness_root/harness/scripts/ensure_main_branch.sh"
+
 if [ "$HARNESS_CONFIG_SOURCE" != "$harness_root" ] || [ "$HARNESS_CONFIG_VERSION" != "$harness_version" ]; then
   echo "Updating harness source/version in $config_file to $harness_root@$harness_version"
   python3 - "$config_file" "$harness_root" "$harness_version" <<'PY'
@@ -109,6 +111,8 @@ WRAPPER
     harness_merge \
     harness_publish \
     harness_push \
+    ensure_main_branch \
+    install_github_cli \
     install_git_hooks \
     open_pr \
     squash_merge_pr \

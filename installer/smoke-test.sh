@@ -23,6 +23,8 @@ test -x "$project/scripts/finish_task.sh"
 test -x "$project/scripts/harness_merge.sh"
 test -x "$project/scripts/harness_push.sh"
 test -x "$project/scripts/harness_publish.sh"
+test -x "$project/scripts/ensure_main_branch.sh"
+test -x "$project/scripts/install_github_cli.sh"
 test -x "$project/scripts/finish_codex_worktree_task.sh"
 test -x "$project/scripts/finish_codex_pr_task.sh"
 test -x "$project/githooks/pre-commit"
@@ -32,6 +34,9 @@ test -f "$project/.codex/skills/prd-development/SKILL.md"
 (
   cd "$project"
   ./scripts/harness_status.sh --check
+  test "$(git symbolic-ref --quiet --short HEAD)" = "main"
+  ./scripts/ensure_main_branch.sh
+  ./scripts/install_github_cli.sh --dry-run >/dev/null
   ./scripts/verify.sh
   ./scripts/start_task.sh "Smoke workflow" task/smoke-workflow >/dev/null
   test -d docs/exec-plans/active

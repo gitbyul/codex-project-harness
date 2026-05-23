@@ -62,6 +62,13 @@ Use `--dry-run` to verify command wiring without writing to the remote:
 ./scripts/harness_publish.sh "feat(scope): 작업 설명" --pr --dry-run
 ```
 
+For new repositories, install/update/bootstrap keeps the local primary branch on `main` when the repository is still in its initial state. For PR workflows, install GitHub CLI if needed:
+
+```bash
+./scripts/install_github_cli.sh --dry-run
+./scripts/install_github_cli.sh
+```
+
 Check the installed shared harness version and managed file coverage:
 
 ```bash

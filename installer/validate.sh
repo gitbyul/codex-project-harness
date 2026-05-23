@@ -8,6 +8,8 @@ required_paths=(
   "AGENTS.md"
   "manifest.json"
   "harness/scripts/verify.sh"
+  "harness/scripts/ensure_main_branch.sh"
+  "harness/scripts/install_github_cli.sh"
   "harness/scripts/harness_config.py"
   "harness/scripts/harness_commit.sh"
   "harness/githooks/pre-commit"

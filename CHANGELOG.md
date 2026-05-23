@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.0
+
+- Ensure initial Git repositories use `main` as the local primary branch during
+  harness install/update/bootstrap.
+- Add `install_github_cli.sh` wrapper to install or dry-run GitHub CLI setup across
+  macOS, Linux package managers, and Windows package managers.
+
 ## 0.4.0
 
 - Block direct `harness_commit.sh` use by default so agents do not stop after

@@ -47,6 +47,8 @@ module_paths = {
         "scripts/harness_merge.sh",
         "scripts/harness_push.sh",
         "scripts/harness_publish.sh",
+        "scripts/ensure_main_branch.sh",
+        "scripts/install_github_cli.sh",
         "scripts/finish_codex_worktree_task.sh",
         "scripts/finish_codex_pr_task.sh",
         "scripts/open_pr.sh",

@@ -6,6 +6,8 @@ PROJECT_ROOT="${HARNESS_PROJECT_ROOT:-$(pwd)}"
 cd "$PROJECT_ROOT"
 export HARNESS_PROJECT_ROOT="$PROJECT_ROOT"
 
+"$HARNESS_SCRIPT_DIR/ensure_main_branch.sh"
+
 git config core.hooksPath githooks
 chmod +x githooks/pre-commit githooks/commit-msg
 chmod +x scripts/*.sh scripts/*.py

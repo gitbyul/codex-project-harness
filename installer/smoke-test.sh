@@ -21,7 +21,10 @@ test -x "$project/scripts/harness_status.sh"
 test -x "$project/scripts/start_task.sh"
 test -x "$project/scripts/finish_task.sh"
 test -x "$project/scripts/harness_merge.sh"
+test -x "$project/scripts/harness_push.sh"
+test -x "$project/scripts/harness_publish.sh"
 test -x "$project/scripts/finish_codex_worktree_task.sh"
+test -x "$project/scripts/finish_codex_pr_task.sh"
 test -x "$project/githooks/pre-commit"
 test -x "$project/githooks/commit-msg"
 test -f "$project/.codex/skills/prd-development/SKILL.md"
@@ -38,6 +41,7 @@ test -f "$project/.codex/skills/prd-development/SKILL.md"
   test -d docs/exec-plans/completed
   test -z "$(find docs/exec-plans/active -maxdepth 1 -type f -name '*.md' -print)"
   test -n "$(find docs/exec-plans/completed -maxdepth 1 -type f -name '*.md' -print -quit)"
+  ./scripts/harness_publish.sh "feat(smoke): 스모크 검증" --dry-run
 )
 
 python3 "$harness_root/harness/scripts/harness_config.py" \

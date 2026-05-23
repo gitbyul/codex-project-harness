@@ -46,6 +46,20 @@ Use the installed project wrappers for implementation work:
 
 The workflow creates an execution plan, records a run artifact, verifies the project, commits through the harness checks, merges into the main branch, and removes the merged branch/source worktree when possible.
 
+For remote publication and PR-based delivery, use the CLI wrappers instead of relying on agent-only skills:
+
+```bash
+./scripts/finish_codex_pr_task.sh "feat(scope): 작업 설명"
+./scripts/harness_publish.sh "feat(scope): 작업 설명" --pr
+./scripts/harness_publish.sh "feat(scope): 작업 설명" --push-only
+```
+
+Use `--dry-run` to verify command wiring without writing to the remote:
+
+```bash
+./scripts/harness_publish.sh "feat(scope): 작업 설명" --pr --dry-run
+```
+
 Check the installed shared harness version and managed file coverage:
 
 ```bash

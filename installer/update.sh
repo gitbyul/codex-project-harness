@@ -104,8 +104,11 @@ WRAPPER
     create_run_artifact \
     create_worktree \
     finish_codex_worktree_task \
+    finish_codex_pr_task \
     finish_task \
     harness_merge \
+    harness_publish \
+    harness_push \
     install_git_hooks \
     open_pr \
     squash_merge_pr \

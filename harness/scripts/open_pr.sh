@@ -6,7 +6,41 @@ PROJECT_ROOT="${HARNESS_PROJECT_ROOT:-$(pwd)}"
 cd "$PROJECT_ROOT"
 export HARNESS_PROJECT_ROOT="$PROJECT_ROOT"
 
-base="${1:-main}"
+base="main"
+remote="origin"
+dry_run="false"
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --base)
+      base="${2:-}"
+      shift 2
+      ;;
+    --remote)
+      remote="${2:-}"
+      shift 2
+      ;;
+    --dry-run)
+      dry_run="true"
+      shift
+      ;;
+    -h|--help)
+      echo "usage: ./scripts/open_pr.sh [--base main] [--remote origin] [--dry-run]"
+      exit 0
+      ;;
+    *)
+      if [ "$base" = "main" ]; then
+        base="$1"
+        shift
+      else
+        echo "unknown argument: $1"
+        echo "usage: ./scripts/open_pr.sh [--base main] [--remote origin] [--dry-run]"
+        exit 2
+      fi
+      ;;
+  esac
+done
+
 head="$(git branch --show-current)"
 
 if [ -z "$head" ]; then
@@ -24,16 +58,21 @@ if ! git diff --quiet || ! git diff --cached --quiet || [ -n "$(git ls-files --o
   exit 1
 fi
 
-if ! command -v gh >/dev/null 2>&1; then
+if [ "$dry_run" != "true" ] && ! command -v gh >/dev/null 2>&1; then
   echo "GitHub CLI(gh)가 필요합니다. gh 설치 후 다시 실행하세요."
   exit 1
 fi
 
-"$HARNESS_SCRIPT_DIR/verify.sh"
-python3 "$HARNESS_SCRIPT_DIR/check_pr_plan.py" --base "$base" --branch "$head"
-python3 "$HARNESS_SCRIPT_DIR/check_test_handoff.py" --base "$base" --branch "$head"
+push_args=(--base "$base" --remote "$remote")
+if [ "$dry_run" = "true" ]; then
+  push_args+=(--dry-run)
+fi
+"$HARNESS_SCRIPT_DIR/harness_push.sh" "${push_args[@]}"
 
-git push -u origin "$head"
+if [ "$dry_run" = "true" ]; then
+  echo "dry run: gh pr create --base $base --head $head --draft"
+  exit 0
+fi
 
 title="$(git log -1 --pretty=%s)"
 body_file="$(mktemp)"

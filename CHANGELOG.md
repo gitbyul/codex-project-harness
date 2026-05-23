@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.0
+
+- Add CLI-first publish flow wrappers for consuming projects:
+  `harness_push.sh`, `harness_publish.sh`, and `finish_codex_pr_task.sh`.
+- Support dry-run checks for publish/PR commands so projects can verify the flow
+  without writing to remotes.
+- Route PR creation through the shared push gate so verify, completed execution
+  plan, and test handoff checks run before remote publication.
+
 ## 0.2.0
 
 - Expose the full harness workflow through consuming project wrappers:

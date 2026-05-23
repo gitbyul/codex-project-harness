@@ -22,6 +22,7 @@ This directory is the central source for shared Codex harness engineering and ge
 
 - Prefer `harness/scripts/start_task.sh` or an installed `./scripts/start_task.sh` before making non-trivial harness changes.
 - Finish work through `finish_task.sh`, `harness_commit.sh`, and `harness_merge.sh` where possible so execution plans, run artifacts, validation, branch cleanup, and worktree cleanup stay connected.
+- For remote delivery from a consuming project, prefer installed CLI wrappers such as `harness_publish.sh`, `harness_push.sh`, `finish_codex_pr_task.sh`, `open_pr.sh`, and `squash_merge_pr.sh` over plugin-only or skill-only flows.
 - If manual Git commands are used because the workflow itself is being repaired, record the reason in the execution plan or final response.
 
 ## Validation

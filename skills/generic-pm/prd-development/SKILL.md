@@ -25,9 +25,7 @@ Use this skill to turn product notes into an engineering-ready PRD. Keep the doc
    - success metrics
    - dependencies, risks, and open questions
 4. Keep requirements testable and separate product intent from implementation details.
-5. For this repository, preserve RVC-specific constraints:
-   - consent, rights, ownership, model state, policy, and audit gates are product requirements
-   - audio quality and QC criteria must be represented when training, separation, conversion, preview, download, or feedback is in scope
+5. Preserve project-specific constraints only when they are present in the consuming project's source documents or local skills.
 
 ## Output Rules
 
@@ -35,4 +33,4 @@ Use this skill to turn product notes into an engineering-ready PRD. Keep the doc
 - Use `template.md` when creating a new PRD from scratch.
 - Do not invent metrics, thresholds, legal terms, or technical commitments that are not supported by source documents. Mark uncertain items as TBD or open questions.
 - If the PRD touches user stories or ticket breakdown, use or follow `deliver-user-stories`.
-- If the PRD is for this RVC project and touches scope, rights, or quality, use or follow `rvc-product-scope`, `rvc-rights-policy-gates`, and `rvc-quality-qc` as relevant.
+- If local project-specific skills are relevant, use them as constraints instead of adding domain assumptions to this generic PRD.

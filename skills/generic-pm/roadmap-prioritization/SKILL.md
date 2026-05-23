@@ -35,4 +35,4 @@ Use this skill when deciding what should be built now, later, or not at all. Mak
 - Do not fabricate scores or evidence. Use TBD or qualitative confidence when data is missing.
 - Include a short recommendation and the rationale behind it.
 - Preserve hard constraints before scoring optional value.
-- For this RVC project, treat consent, rights, policy gates, auditability, and traceability as blocking constraints, not optional roadmap items.
+- Treat documented project constraints as blocking constraints before scoring optional roadmap value.

@@ -35,4 +35,4 @@ Use this skill to turn messy discovery input into decision-ready product underst
 - Do not invent research findings, metrics, user quotes, or market facts.
 - Label unsupported claims as assumptions or open questions.
 - Prefer concise tables for themes, evidence, impact, confidence, and next action.
-- For this RVC project, flag any discovery finding that affects consent, rights, quality, auditability, or traceability.
+- Flag project-specific constraints only when they are evidenced by the consuming project's documents or local skills.

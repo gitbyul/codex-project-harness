@@ -32,4 +32,4 @@ Use this skill to communicate product progress and decisions clearly to stakehol
 - Do not invent owners, dates, commitments, or status.
 - Separate facts from asks and recommendations.
 - Prefer a short structure: status, changes, risks, decisions needed, next actions.
-- For this RVC project, explicitly mention consent, rights, traceability, quality, or security risks when they affect scope or release confidence.
+- Explicitly mention documented product, quality, security, compliance, or operational risks when they affect scope or release confidence.

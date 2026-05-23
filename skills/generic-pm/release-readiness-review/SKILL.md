@@ -30,4 +30,4 @@ Use this skill to produce a PM-facing go/no-go review before shipping a feature,
 - Write in the language of the target document.
 - Do not mark ready without concrete evidence.
 - Keep the recommendation concise and traceable to requirements or test results.
-- For this RVC project, missing consent, ownership, model status, audit, traceability, or quality gates are blockers for launch readiness.
+- Missing documented project gates, required evidence, rollback plans, or operational ownership should be treated as blockers until resolved.

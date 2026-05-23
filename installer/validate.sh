@@ -8,10 +8,12 @@ required_paths=(
   "AGENTS.md"
   "manifest.json"
   "harness/scripts/verify.sh"
+  "harness/scripts/harness_config.py"
   "harness/scripts/harness_commit.sh"
   "harness/githooks/pre-commit"
   "harness/githooks/commit-msg"
   "harness/github-workflows/verify.yml"
+  "installer/smoke-test.sh"
   "templates/.codex-harness.yml"
 )
 
@@ -33,8 +35,9 @@ for skill in product-discovery-synthesis prd-development deliver-user-stories ro
   fi
 done
 
-bash -n installer/install.sh installer/update.sh installer/update-all.sh installer/validate.sh
+bash -n installer/install.sh installer/update.sh installer/update-all.sh installer/validate.sh installer/smoke-test.sh
 bash -n harness/scripts/*.sh
 python3 -m py_compile harness/scripts/*.py
+installer/smoke-test.sh
 
 echo "codex-project-harness validation passed"

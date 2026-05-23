@@ -20,6 +20,7 @@ export HARNESS_PROJECT_ROOT="$PROJECT_ROOT"
 "$PYTHON_BIN" -m py_compile "$HARNESS_SCRIPT_DIR"/*.py
 "$PYTHON_BIN" "$HARNESS_SCRIPT_DIR/guard_architecture.py"
 "$PYTHON_BIN" "$HARNESS_SCRIPT_DIR/check_exec_plans.py"
+"$PYTHON_BIN" "$HARNESS_SCRIPT_DIR/check_qa_plan.py"
 "$PYTHON_BIN" "$HARNESS_SCRIPT_DIR/check_artifacts.py"
 "$PYTHON_BIN" "$HARNESS_SCRIPT_DIR/check_secrets.py"
 "$PYTHON_BIN" "$HARNESS_SCRIPT_DIR/check_git_hooks.py"
@@ -30,3 +31,5 @@ if [ "$verify_command" != "" ] && [ "$verify_command" != "./scripts/verify.sh" ]
 elif [ -x "scripts/project_verify.sh" ]; then
   PYTHON="$PYTHON_BIN_ABS" scripts/project_verify.sh
 fi
+
+"$PYTHON_BIN" "$HARNESS_SCRIPT_DIR/check_quality_gates.py"

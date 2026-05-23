@@ -1,6 +1,6 @@
 harness:
   source: /path/to/codex-project-harness
-  version: 0.6.0
+  version: 0.8.0
   ci:
     # local_path is for self-hosted runners that have harness.source.
     # Use checkout with repository/ref for GitHub-hosted runners.
@@ -47,6 +47,11 @@ artifacts:
     - .ckpt
     - .safetensors
     - .bin
+
+quality:
+  enabled: true
+  commands: []
+  required_plan_sections: true
 
 local_overrides:
   skills: []

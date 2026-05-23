@@ -57,6 +57,11 @@ DEFAULT_CONFIG: dict[str, Any] = {
             ".bin",
         ],
     },
+    "quality": {
+        "enabled": True,
+        "commands": [],
+        "required_plan_sections": True,
+    },
 }
 
 
@@ -195,6 +200,11 @@ def main() -> int:
             "HARNESS_PROJECT_NAME": get_path(config, "project.name"),
             "HARNESS_PROJECT_CODE_ROOT": get_path(config, "project.code_root"),
             "HARNESS_PROJECT_VERIFY_COMMAND": get_path(config, "project.verify_command"),
+            "HARNESS_QUALITY_ENABLED": get_path(config, "quality.enabled"),
+            "HARNESS_QUALITY_COMMANDS": get_path(config, "quality.commands"),
+            "HARNESS_QUALITY_REQUIRED_PLAN_SECTIONS": get_path(
+                config, "quality.required_plan_sections"
+            ),
         }
         for key, value in exports.items():
             print(f"{key}={shell_quote(value)}")

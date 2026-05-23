@@ -48,6 +48,15 @@ $(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 - 
 
+## QA 결과
+
+- Small/unit:
+- Medium/integration:
+- Contract:
+- Large/E2E smoke:
+- 수동 확인:
+- 미검증 영역:
+
 ## 아티팩트
 
 - 로그: \`${run_dir}/logs/\`

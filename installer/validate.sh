@@ -10,6 +10,13 @@ required_paths=(
   "harness/scripts/verify.sh"
   "harness/scripts/ensure_main_branch.sh"
   "harness/scripts/install_github_cli.sh"
+  "harness/scripts/manage_goal.py"
+  "harness/scripts/start_goal.sh"
+  "harness/scripts/start_goal_unit.sh"
+  "harness/scripts/finish_goal_unit.sh"
+  "harness/scripts/finish_goal.sh"
+  "harness/scripts/check_quality_gates.py"
+  "harness/scripts/check_qa_plan.py"
   "harness/scripts/harness_config.py"
   "harness/scripts/check_local_path_leaks.py"
   "harness/scripts/harness_commit.sh"
@@ -19,6 +26,11 @@ required_paths=(
   "installer/status.sh"
   "installer/smoke-test.sh"
   "templates/.codex-harness.yml"
+  "templates/docs/engineering/backend-mocking-rules.md"
+  "templates/docs/engineering/frontend-mocking-rules.md"
+  "templates/docs/engineering/development-quality-rules.md"
+  "templates/docs/engineering/qa-test-strategy.md"
+  "templates/docs/engineering/release-quality-gates.md"
 )
 
 for path in "${required_paths[@]}"; do

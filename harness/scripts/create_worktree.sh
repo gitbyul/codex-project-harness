@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd "$(dirname "$0")/.."
+PROJECT_ROOT="${HARNESS_PROJECT_ROOT:-$(pwd)}"
+cd "$PROJECT_ROOT"
 
 if [ "$#" -lt 1 ]; then
   echo "usage: ./scripts/create_worktree.sh <branch-name> [worktree-path]"
@@ -9,7 +10,8 @@ if [ "$#" -lt 1 ]; then
 fi
 
 branch="$1"
-target="${2:-../$(basename "$(pwd)")-$branch}"
+safe_branch="${branch//\//-}"
+target="${2:-../$(basename "$(pwd)")-$safe_branch}"
 
 case "$branch" in
   main|master)

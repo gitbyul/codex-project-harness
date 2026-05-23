@@ -1,9 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd "$(dirname "$0")/.."
+PROJECT_ROOT="${HARNESS_PROJECT_ROOT:-$(pwd)}"
+cd "$PROJECT_ROOT"
 
-git config core.hooksPath githooks
-chmod +x githooks/pre-commit githooks/commit-msg
+hooks_path="githooks"
+if [ ! -d "$hooks_path" ] && [ -d "harness/githooks" ]; then
+  hooks_path="harness/githooks"
+fi
 
-echo "configured core.hooksPath=githooks"
+git config core.hooksPath "$hooks_path"
+chmod +x "$hooks_path/pre-commit" "$hooks_path/commit-msg"
+
+echo "configured core.hooksPath=$hooks_path"

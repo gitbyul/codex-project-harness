@@ -6,6 +6,14 @@ harness_root="$(cd "$script_dir/.." && pwd)"
 target="${1:-$(pwd)}"
 target_root="$(cd "$target" && pwd)"
 config_file="$target_root/.codex-harness.yml"
+harness_version="$(python3 - "$harness_root/manifest.json" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+print(json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))["version"])
+PY
+)"
 
 if [ "$target_root" = "$harness_root" ]; then
   echo "Refusing to update codex-project-harness from its own installer."
@@ -21,16 +29,19 @@ fi
 
 eval "$("$harness_root/harness/scripts/harness_config.py" --config "$config_file" --shell)"
 
-if [ "$HARNESS_CONFIG_SOURCE" != "$harness_root" ]; then
-  echo "Updating harness.source in $config_file to $harness_root"
-  python3 - "$config_file" "$harness_root" <<'PY'
+if [ "$HARNESS_CONFIG_SOURCE" != "$harness_root" ] || [ "$HARNESS_CONFIG_VERSION" != "$harness_version" ]; then
+  echo "Updating harness source/version in $config_file to $harness_root@$harness_version"
+  python3 - "$config_file" "$harness_root" "$harness_version" <<'PY'
 from pathlib import Path
 import sys
 
 path = Path(sys.argv[1])
 source = sys.argv[2]
+version = sys.argv[3]
 lines = path.read_text(encoding="utf-8").splitlines()
 inside_harness = False
+seen_source = False
+seen_version = False
 for index, line in enumerate(lines):
     stripped = line.strip()
     if stripped == "harness:":
@@ -41,9 +52,17 @@ for index, line in enumerate(lines):
     if inside_harness and stripped.startswith("source:"):
         indent = line[: len(line) - len(line.lstrip())]
         lines[index] = f"{indent}source: {source}"
-        break
-else:
-    lines.insert(1, f"  source: {source}")
+        seen_source = True
+    if inside_harness and stripped.startswith("version:"):
+        indent = line[: len(line) - len(line.lstrip())]
+        lines[index] = f"{indent}version: {version}"
+        seen_version = True
+insert_at = 1
+if not seen_source:
+    lines.insert(insert_at, f"  source: {source}")
+    insert_at += 1
+if not seen_version:
+    lines.insert(insert_at, f"  version: {version}")
 path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 PY
 fi
@@ -70,7 +89,41 @@ harness_root="$harness_root"
 HARNESS_PROJECT_ROOT="\$repo_root" "\$harness_root/harness/scripts/harness_commit.sh" "\$@"
 WRAPPER
 
-  chmod +x "$target_root/scripts/verify.sh" "$target_root/scripts/harness_commit.sh"
+  cat > "$target_root/scripts/harness_status.sh" <<WRAPPER
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="\$(cd "\$(dirname "\$0")/.." && pwd)"
+harness_root="$harness_root"
+
+"\$harness_root/installer/status.sh" "\$repo_root" "\$@"
+WRAPPER
+
+  for script_name in \
+    bootstrap \
+    create_run_artifact \
+    create_worktree \
+    finish_codex_worktree_task \
+    finish_task \
+    harness_merge \
+    install_git_hooks \
+    open_pr \
+    squash_merge_pr \
+    start_codex_worktree \
+    start_task
+  do
+    cat > "$target_root/scripts/${script_name}.sh" <<WRAPPER
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="\$(cd "\$(dirname "\$0")/.." && pwd)"
+harness_root="$harness_root"
+
+HARNESS_PROJECT_ROOT="\$repo_root" "\$harness_root/harness/scripts/${script_name}.sh" "\$@"
+WRAPPER
+  done
+
+  chmod +x "$target_root/scripts/"*.sh
 fi
 
 if [ "$HARNESS_MODULE_GITHOOKS" = "true" ]; then

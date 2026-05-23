@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd "$(dirname "$0")/.."
+HARNESS_SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_ROOT="${HARNESS_PROJECT_ROOT:-$(pwd)}"
+cd "$PROJECT_ROOT"
+export HARNESS_PROJECT_ROOT="$PROJECT_ROOT"
 
 if [ "$#" -lt 1 ]; then
   echo "usage: ./scripts/start_codex_worktree.sh '<작업 이름>' [branch-name] [worktree-path]"
@@ -9,7 +12,7 @@ if [ "$#" -lt 1 ]; then
 fi
 
 title="$1"
-slug="$(python3 scripts/slugify.py "$title")"
+slug="$(python3 "$HARNESS_SCRIPT_DIR/slugify.py" "$title")"
 branch="${2:-task/$slug}"
 safe_branch="${branch//\//-}"
 target="${3:-../$(basename "$(pwd)")-$safe_branch}"
@@ -30,12 +33,12 @@ if [ "$main_branch" = "main" ] || [ "$main_branch" = "master" ]; then
   fi
 fi
 
-./scripts/create_worktree.sh "$branch" "$target"
+"$HARNESS_SCRIPT_DIR/create_worktree.sh" "$branch" "$target"
 
 (
   cd "$target"
-  ./scripts/install_git_hooks.sh
-  ./scripts/start_task.sh "$title" "$branch"
+  HARNESS_PROJECT_ROOT="$PWD" "$HARNESS_SCRIPT_DIR/install_git_hooks.sh"
+  HARNESS_PROJECT_ROOT="$PWD" "$HARNESS_SCRIPT_DIR/start_task.sh" "$title" "$branch"
 )
 
 echo "codex worktree ready: $target"

@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd "$(dirname "$0")/.."
+HARNESS_SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_ROOT="${HARNESS_PROJECT_ROOT:-$(pwd)}"
+cd "$PROJECT_ROOT"
+export HARNESS_PROJECT_ROOT="$PROJECT_ROOT"
 
 if [ "$#" -lt 1 ]; then
   echo "usage: ./scripts/finish_codex_worktree_task.sh '<type>(scope): 한국어 설명' [plan-path] [main-branch]"
@@ -25,10 +28,13 @@ case "$branch" in
     ;;
 esac
 
-./scripts/install_git_hooks.sh
+"$HARNESS_SCRIPT_DIR/install_git_hooks.sh"
 
 if [ -z "$plan" ]; then
-  mapfile -t active_plans < <(find docs/exec-plans/active -maxdepth 1 -type f -name '*.md' | sort)
+  active_plans=()
+  while IFS= read -r active_plan; do
+    active_plans+=("$active_plan")
+  done < <(find docs/exec-plans/active -maxdepth 1 -type f -name '*.md' | sort)
   if [ "${#active_plans[@]}" -ne 1 ]; then
     echo "완료할 활성 실행 계획을 하나로 특정할 수 없습니다."
     echo "usage: ./scripts/finish_codex_worktree_task.sh '<type>(scope): 한국어 설명' docs/exec-plans/active/<plan>.md"
@@ -39,13 +45,13 @@ if [ -z "$plan" ]; then
 fi
 
 if [ -n "$plan" ]; then
-  ./scripts/finish_task.sh "$plan"
+  "$HARNESS_SCRIPT_DIR/finish_task.sh" "$plan"
 else
-  ./scripts/finish_task.sh
+  "$HARNESS_SCRIPT_DIR/finish_task.sh"
 fi
 
 git add -A
-./scripts/harness_commit.sh "$message"
-./scripts/harness_merge.sh "$branch" "$main_branch"
+"$HARNESS_SCRIPT_DIR/harness_commit.sh" "$message"
+"$HARNESS_SCRIPT_DIR/harness_merge.sh" "$branch" "$main_branch"
 
 echo "finished, committed, and merged: $branch -> $main_branch"

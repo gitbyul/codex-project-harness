@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd "$(dirname "$0")/.."
+HARNESS_SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_ROOT="${HARNESS_PROJECT_ROOT:-$(pwd)}"
+cd "$PROJECT_ROOT"
+export HARNESS_PROJECT_ROOT="$PROJECT_ROOT"
 
 base="${1:-main}"
 head="$(git branch --show-current)"
@@ -26,9 +29,9 @@ if ! command -v gh >/dev/null 2>&1; then
   exit 1
 fi
 
-./scripts/verify.sh
-python3 scripts/check_pr_plan.py --base "$base" --branch "$head"
-python3 scripts/check_test_handoff.py --base "$base" --branch "$head"
+"$HARNESS_SCRIPT_DIR/verify.sh"
+python3 "$HARNESS_SCRIPT_DIR/check_pr_plan.py" --base "$base" --branch "$head"
+python3 "$HARNESS_SCRIPT_DIR/check_test_handoff.py" --base "$base" --branch "$head"
 
 git push -u origin "$head"
 

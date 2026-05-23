@@ -13,6 +13,7 @@ required_paths=(
   "harness/githooks/pre-commit"
   "harness/githooks/commit-msg"
   "harness/github-workflows/verify.yml"
+  "installer/status.sh"
   "installer/smoke-test.sh"
   "templates/.codex-harness.yml"
 )
@@ -35,7 +36,7 @@ for skill in product-discovery-synthesis prd-development deliver-user-stories ro
   fi
 done
 
-bash -n installer/install.sh installer/update.sh installer/update-all.sh installer/validate.sh installer/smoke-test.sh
+bash -n installer/install.sh installer/update.sh installer/update-all.sh installer/validate.sh installer/smoke-test.sh installer/status.sh
 bash -n harness/scripts/*.sh
 python3 -m py_compile harness/scripts/*.py
 installer/smoke-test.sh

@@ -1,6 +1,6 @@
 harness:
   source: /Users/abyul/Desktop/project/codex-project-harness
-  version: local
+  version: 0.2.0
   ci:
     # local_path is for self-hosted runners that have harness.source.
     # Use checkout with repository/ref for GitHub-hosted runners.

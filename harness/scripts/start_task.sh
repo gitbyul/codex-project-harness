@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd "$(dirname "$0")/.."
+HARNESS_SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_ROOT="${HARNESS_PROJECT_ROOT:-$(pwd)}"
+cd "$PROJECT_ROOT"
+export HARNESS_PROJECT_ROOT="$PROJECT_ROOT"
 
 if [ "$#" -lt 1 ]; then
   echo "usage: ./scripts/start_task.sh '<작업 이름>' [branch-name]"
@@ -9,11 +12,13 @@ if [ "$#" -lt 1 ]; then
 fi
 
 title="$1"
-slug="$(python3 scripts/slugify.py "$title")"
+slug="$(python3 "$HARNESS_SCRIPT_DIR/slugify.py" "$title")"
 branch="${2:-task/$slug}"
 timestamp="$(date +%Y%m%d-%H%M%S)"
 plan="docs/exec-plans/active/${timestamp}-${slug}.md"
-run_path="$(./scripts/create_run_artifact.sh "$slug")"
+
+mkdir -p docs/exec-plans/active docs/exec-plans/completed artifacts/runs
+run_path="$("$HARNESS_SCRIPT_DIR/create_run_artifact.sh" "$slug")"
 
 current_branch="$(git branch --show-current)"
 if [ "$current_branch" = "main" ] || [ "$current_branch" = "master" ]; then
@@ -45,9 +50,7 @@ cat > "$plan" <<EOF
 
 ## 영향 파일
 
-- \`docs/**\`
-- \`scripts/**\`
-- \`artifacts/runs/**\`
+- \`**\`
 
 ## 아티팩트
 
@@ -66,7 +69,7 @@ cat > "$plan" <<EOF
 ## 검증
 
 \`\`\`bash
-./scripts/verify.sh
+HARNESS_PROJECT_ROOT="$PROJECT_ROOT" "$HARNESS_SCRIPT_DIR/verify.sh"
 \`\`\`
 
 ## 구현 담당
@@ -80,7 +83,7 @@ cat > "$plan" <<EOF
 ## 테스트 명령
 
 \`\`\`bash
-./scripts/verify.sh
+HARNESS_PROJECT_ROOT="$PROJECT_ROOT" "$HARNESS_SCRIPT_DIR/verify.sh"
 \`\`\`
 
 ## 테스트 검증 결과

@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd "$(dirname "$0")/.."
+HARNESS_SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_ROOT="${HARNESS_PROJECT_ROOT:-$(pwd)}"
+cd "$PROJECT_ROOT"
+export HARNESS_PROJECT_ROOT="$PROJECT_ROOT"
 
 source_branch="${1:-$(git branch --show-current)}"
 main_branch="${2:-main}"
@@ -73,14 +76,14 @@ if [ -z "$main_worktree" ]; then
   exit 1
 fi
 
-python3 scripts/check_worktree_clean.py "$source_branch"
-python3 scripts/check_worktree_clean.py "$main_branch"
+python3 "$HARNESS_SCRIPT_DIR/check_worktree_clean.py" "$source_branch"
+python3 "$HARNESS_SCRIPT_DIR/check_worktree_clean.py" "$main_branch"
 
 (
   cd "$source_worktree"
-  ./scripts/verify.sh
-  python3 scripts/check_pr_plan.py --base "$main_branch" --branch "$source_branch"
-  python3 scripts/check_test_handoff.py --base "$main_branch" --branch "$source_branch"
+  HARNESS_PROJECT_ROOT="$PWD" "$HARNESS_SCRIPT_DIR/verify.sh"
+  HARNESS_PROJECT_ROOT="$PWD" python3 "$HARNESS_SCRIPT_DIR/check_pr_plan.py" --base "$main_branch" --branch "$source_branch"
+  HARNESS_PROJECT_ROOT="$PWD" python3 "$HARNESS_SCRIPT_DIR/check_test_handoff.py" --base "$main_branch" --branch "$source_branch"
 )
 
 (
@@ -91,7 +94,7 @@ python3 scripts/check_worktree_clean.py "$main_branch"
     echo "작업 브랜치를 최신 $main_branch 위로 rebase한 뒤 다시 실행하거나 PR 흐름을 사용하세요."
     exit 1
   fi
-  ./scripts/verify.sh
+  HARNESS_PROJECT_ROOT="$PWD" "$HARNESS_SCRIPT_DIR/verify.sh"
 )
 
 if [ "$source_branch" != "$main_branch" ] && [ "$source_branch" != "main" ] && [ "$source_branch" != "master" ]; then

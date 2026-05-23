@@ -35,17 +35,36 @@ def git_dir() -> Path:
     return path
 
 
+def hook_template_dir() -> Path:
+    project_hooks = ROOT / "githooks"
+    if project_hooks.is_dir():
+        return project_hooks
+    central_hooks = ROOT / "harness" / "githooks"
+    if central_hooks.is_dir():
+        return central_hooks
+    return project_hooks
+
+
+def hook_template_relpath() -> str:
+    template_dir = hook_template_dir()
+    try:
+        return str(template_dir.relative_to(ROOT))
+    except ValueError:
+        return str(template_dir)
+
+
 def same_content(left: Path, right: Path) -> bool:
     return left.read_bytes() == right.read_bytes()
 
 
 def check_templates(errors: list[str]) -> None:
+    template_dir = hook_template_dir()
     for hook in HOOKS:
-        path = ROOT / "githooks" / hook
+        path = template_dir / hook
         if not path.is_file():
-            errors.append(f"hook 템플릿이 없습니다: githooks/{hook}")
+            errors.append(f"hook 템플릿이 없습니다: {hook_template_relpath()}/{hook}")
         elif not path.stat().st_mode & 0o111:
-            errors.append(f"hook 템플릿에 실행 권한이 없습니다: githooks/{hook}")
+            errors.append(f"hook 템플릿에 실행 권한이 없습니다: {hook_template_relpath()}/{hook}")
 
 
 def core_hooks_path() -> str:
@@ -59,12 +78,12 @@ def core_hooks_path() -> str:
 
 def check_installed(errors: list[str]) -> None:
     configured = core_hooks_path()
-    if configured == "githooks":
+    if configured == hook_template_relpath():
         return
 
     hooks_dir = git_dir() / "hooks"
     for hook in HOOKS:
-        template = ROOT / "githooks" / hook
+        template = hook_template_dir() / hook
         installed = hooks_dir / hook
         if not installed.is_file():
             errors.append(f"Git hook이 설치되지 않았습니다: {installed}")

@@ -34,6 +34,25 @@ The shared PM skill source remains in the central harness. Project-local generic
 5. Use `release-readiness-review` before launch or milestone completion.
 6. Use `stakeholder-status-update` for status, decision summaries, handoffs, and escalations.
 
+## Harness Workflow
+
+Use the installed project wrappers for implementation work:
+
+```bash
+./scripts/start_task.sh "작업 이름" task/example
+# make changes
+./scripts/finish_codex_worktree_task.sh "feat(scope): 작업 설명"
+```
+
+The workflow creates an execution plan, records a run artifact, verifies the project, commits through the harness checks, merges into the main branch, and removes the merged branch/source worktree when possible.
+
+Check the installed shared harness version and managed file coverage:
+
+```bash
+./scripts/harness_status.sh
+./scripts/harness_status.sh --check
+```
+
 ## Project-Specific Skills
 
 Project-specific skills stay in the consuming project. Do not add domain-specific product rules to the central generic PM skills unless they apply broadly across projects.

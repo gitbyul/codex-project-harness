@@ -1,18 +1,52 @@
 harness:
   source: /Users/abyul/Desktop/project/codex-project-harness
   version: local
+  ci:
+    # local_path is for self-hosted runners that have harness.source.
+    # Use checkout with repository/ref for GitHub-hosted runners.
+    mode: local_path
+    repository: ""
+    ref: main
 
 modules:
   scripts: true
   githooks: true
-  github_workflows: true
+  github_workflows: false
   generic_pm_skills: true
   docs_templates: false
 
 project:
   name: replace-me
-  code_root: backend
-  verify_command: ./scripts/verify.sh
+  code_root: ""
+  verify_command: ""
+
+architecture:
+  python_source_roots: []
+  forbidden_globals: []
+  forbidden_route_calls: []
+
+artifacts:
+  required: true
+  blocked_staged_suffixes:
+    - .wav
+    - .mp3
+    - .flac
+    - .ogg
+    - .m4a
+    - .png
+    - .jpg
+    - .jpeg
+    - .gif
+    - .webp
+    - .mp4
+    - .mov
+    - .avi
+    - .onnx
+    - .pt
+    - .pth
+    - .ckpt
+    - .safetensors
+    - .bin
 
 local_overrides:
   skills: []

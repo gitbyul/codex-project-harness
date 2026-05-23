@@ -13,14 +13,13 @@ jobs:
         with:
           python-version: "3.12"
       - run: python -m pip install --upgrade pip
-      - run: python -m pip install -e "backend[dev]"
-      - run: ./scripts/verify.sh
+      - run: HARNESS_PROJECT_ROOT="$PWD" harness/scripts/verify.sh
       - name: Validate commit messages
         if: github.event_name == 'pull_request'
-        run: python3 scripts/check_commit_range.py --base origin/${{ github.base_ref }} --head HEAD
+        run: python3 harness/scripts/check_commit_range.py --base origin/${{ github.base_ref }} --head HEAD
       - name: Validate PR execution plan
         if: github.event_name == 'pull_request'
-        run: python3 scripts/check_pr_plan.py --base origin/${{ github.base_ref }} --branch HEAD
+        run: python3 harness/scripts/check_pr_plan.py --base origin/${{ github.base_ref }} --branch HEAD
       - name: Validate independent test handoff
         if: github.event_name == 'pull_request'
-        run: python3 scripts/check_test_handoff.py --base origin/${{ github.base_ref }} --branch HEAD
+        run: python3 harness/scripts/check_test_handoff.py --base origin/${{ github.base_ref }} --branch HEAD

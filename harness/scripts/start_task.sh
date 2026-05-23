@@ -69,7 +69,7 @@ cat > "$plan" <<EOF
 ## 검증
 
 \`\`\`bash
-HARNESS_PROJECT_ROOT="$PROJECT_ROOT" "$HARNESS_SCRIPT_DIR/verify.sh"
+./scripts/verify.sh
 \`\`\`
 
 ## 구현 담당
@@ -83,7 +83,7 @@ HARNESS_PROJECT_ROOT="$PROJECT_ROOT" "$HARNESS_SCRIPT_DIR/verify.sh"
 ## 테스트 명령
 
 \`\`\`bash
-HARNESS_PROJECT_ROOT="$PROJECT_ROOT" "$HARNESS_SCRIPT_DIR/verify.sh"
+./scripts/verify.sh
 \`\`\`
 
 ## 테스트 검증 결과

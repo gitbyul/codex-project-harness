@@ -11,6 +11,7 @@ required_paths=(
   "harness/scripts/ensure_main_branch.sh"
   "harness/scripts/install_github_cli.sh"
   "harness/scripts/harness_config.py"
+  "harness/scripts/check_local_path_leaks.py"
   "harness/scripts/harness_commit.sh"
   "harness/githooks/pre-commit"
   "harness/githooks/commit-msg"
@@ -41,6 +42,7 @@ done
 bash -n installer/install.sh installer/update.sh installer/update-all.sh installer/validate.sh installer/smoke-test.sh installer/status.sh
 bash -n harness/scripts/*.sh
 python3 -m py_compile harness/scripts/*.py
+python3 harness/scripts/check_local_path_leaks.py
 installer/smoke-test.sh
 
 echo "codex-project-harness validation passed"

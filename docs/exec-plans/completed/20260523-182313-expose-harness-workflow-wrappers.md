@@ -59,7 +59,7 @@
 ## 검증
 
 ```bash
-HARNESS_PROJECT_ROOT="/Users/abyul/Desktop/project/codex-project-harness" "/Users/abyul/Desktop/project/codex-project-harness/harness/scripts/verify.sh"
+./installer/validate.sh
 ```
 
 ## 구현 담당
@@ -73,7 +73,7 @@ HARNESS_PROJECT_ROOT="/Users/abyul/Desktop/project/codex-project-harness" "/User
 ## 테스트 명령
 
 ```bash
-HARNESS_PROJECT_ROOT="/Users/abyul/Desktop/project/codex-project-harness" "/Users/abyul/Desktop/project/codex-project-harness/harness/scripts/verify.sh"
+./installer/validate.sh
 ```
 
 ## 테스트 검증 결과

@@ -60,7 +60,8 @@ if [ -z "$source_worktree" ]; then
     exit 1
   fi
   safe_branch="${source_branch//\//-}"
-  source_worktree="/private/tmp/$(basename "$(pwd)")-$safe_branch-merge"
+  temp_root="${TMPDIR:-/tmp}"
+  source_worktree="$temp_root/$(basename "$(pwd)")-$safe_branch-merge"
   if [ -e "$source_worktree" ]; then
     echo "임시 source worktree 경로가 이미 존재합니다: $source_worktree"
     echo "기존 경로를 정리하거나 작업 브랜치를 별도 worktree에 checkout하세요."

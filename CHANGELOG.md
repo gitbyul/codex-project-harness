@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.8.0
+
+- Add goal workflow wrappers that split a larger Codex goal into one-unit
+  worktree tasks: `start_goal.sh`, `start_goal_unit.sh`,
+  `finish_goal_unit.sh`, and `finish_goal.sh`.
+- Track active/completed goal documents under `docs/goals/` and require each
+  goal unit to complete through commit, main merge, branch cleanup, and worktree
+  cleanup before the next unit starts.
+- Add split backend/frontend mocking rule files for minimal Mock/Stub/Fake usage
+  and contract-aligned fixture practices.
+- Add development/QA rule templates, QA sections in execution plans/run
+  artifacts, and configurable `quality.commands` gates that run through
+  `verify.sh`.
+
+- Stop installing the standalone commit wrapper in consuming projects and remove
+  stale installed copies during update.
+- Require commits to flow through finish/publish wrappers so verification,
+  publication, merge, branch cleanup, and worktree cleanup stay connected.
+
 ## 0.6.0
 
 - Make `harness_status.sh --check` validate local Git hook installation, including
@@ -16,11 +35,9 @@
 
 ## 0.4.0
 
-- Block direct `harness_commit.sh` use by default so agents do not stop after
+- Route commit work through the finish/publish flow so agents do not stop after
   commit while leaving push, PR, merge, branch cleanup, or worktree cleanup undone.
-- Require `HARNESS_ALLOW_DIRECT_COMMIT=1` with `HARNESS_BYPASS_REASON` for explicit
-  commit-only exceptions.
-- Let higher-level finish/publish commands call the low-level commit command through
+- Let higher-level finish/publish commands call the internal commit step through
   `HARNESS_INTERNAL_COMMIT=1`.
 
 ## 0.3.0

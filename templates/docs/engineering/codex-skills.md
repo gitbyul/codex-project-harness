@@ -46,7 +46,20 @@ Use the installed project wrappers for implementation work:
 
 The workflow creates an execution plan, records a run artifact, verifies the project, commits through the harness checks, merges into the main branch, and removes the merged branch/source worktree when possible.
 
-Do not use `harness_commit.sh` as the normal completion command. It is a low-level internal command and is blocked by default because commit-only work leaves push, PR, merge, branch cleanup, or worktree cleanup unfinished. Use `finish_codex_worktree_task.sh`, `finish_codex_pr_task.sh`, or `harness_publish.sh`.
+Use the completion wrappers as the only supported commit entry points. Commit-only work leaves push, PR, merge, branch cleanup, or worktree cleanup unfinished, so finish implementation work with `finish_codex_worktree_task.sh`, `finish_codex_pr_task.sh`, or `harness_publish.sh`.
+
+For larger Codex goals, split the goal into small units and use a fresh worktree for each unit:
+
+```bash
+./scripts/start_goal.sh "큰 목표 이름"
+./scripts/start_goal_unit.sh "작은 작업"
+# work inside the printed worktree
+./scripts/finish_goal_unit.sh "feat(scope): 작은 작업"
+```
+
+Start the next goal unit only from the clean main worktree after the previous unit has merged and its branch/source worktree has been removed.
+
+Use `./scripts/harness_status.sh --goal` to inspect the active goal, current unit branch, and active execution plans.
 
 For remote publication and PR-based delivery, use the CLI wrappers instead of relying on agent-only skills:
 
@@ -78,6 +91,20 @@ Check the installed shared harness version and managed file coverage:
 ```
 
 `harness_status.sh --check` also verifies hook installation when `modules.githooks` is enabled.
+
+## Testing And Mocking Rules
+
+Use these engineering rules when a task changes tests, QA gates, fixtures, Fakes, Stubs, or MSW handlers:
+
+- `docs/engineering/development-quality-rules.md`
+- `docs/engineering/qa-test-strategy.md`
+- `docs/engineering/release-quality-gates.md`
+- `docs/engineering/backend-mocking-rules.md`
+- `docs/engineering/frontend-mocking-rules.md`
+
+Backend tests should keep domain logic, authorization, state transitions, repository queries, and transactions on real implementations. Frontend tests should prefer network-level mocking with MSW and avoid mocking component logic, state management, form validation, or business rules.
+
+Project-specific quality commands belong in `.codex-harness.yml` under `quality.commands` and run through `./scripts/verify.sh`. Use `./scripts/harness_status.sh --qa` to inspect configured QA gates.
 
 ## Project-Specific Skills
 

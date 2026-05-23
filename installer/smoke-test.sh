@@ -11,12 +11,14 @@ mkdir -p "$project"
 (
   cd "$project"
   git init -q
+  git config user.email "codex-harness@example.invalid"
+  git config user.name "Codex Harness"
 )
 
 "$script_dir/install.sh" "$project" >/dev/null
 
 test -x "$project/scripts/verify.sh"
-test -x "$project/scripts/harness_commit.sh"
+test ! -e "$project/scripts/harness_commit.sh"
 test -x "$project/scripts/harness_status.sh"
 test -x "$project/scripts/start_task.sh"
 test -x "$project/scripts/finish_task.sh"
@@ -27,6 +29,10 @@ test -x "$project/scripts/ensure_main_branch.sh"
 test -x "$project/scripts/install_github_cli.sh"
 test -x "$project/scripts/finish_codex_worktree_task.sh"
 test -x "$project/scripts/finish_codex_pr_task.sh"
+test -x "$project/scripts/start_goal.sh"
+test -x "$project/scripts/start_goal_unit.sh"
+test -x "$project/scripts/finish_goal_unit.sh"
+test -x "$project/scripts/finish_goal.sh"
 test -x "$project/githooks/pre-commit"
 test -x "$project/githooks/commit-msg"
 test -f "$project/.codex/skills/prd-development/SKILL.md"
@@ -40,6 +46,7 @@ test -f "$project/.codex/skills/prd-development/SKILL.md"
   grep -q "core.hooksPath" /tmp/harness-status-before-hooks.out
   ./scripts/install_git_hooks.sh
   ./scripts/harness_status.sh --check
+  ./scripts/harness_status.sh --qa | grep -q "QA workflow status:"
   test "$(git symbolic-ref --quiet --short HEAD)" = "main"
   ./scripts/ensure_main_branch.sh
   ./scripts/install_github_cli.sh --dry-run >/dev/null
@@ -52,12 +59,25 @@ test -f "$project/.codex/skills/prd-development/SKILL.md"
   test -d docs/exec-plans/completed
   test -z "$(find docs/exec-plans/active -maxdepth 1 -type f -name '*.md' -print)"
   test -n "$(find docs/exec-plans/completed -maxdepth 1 -type f -name '*.md' -print -quit)"
-  if ./scripts/harness_commit.sh "feat(smoke): 직접 커밋 차단" >/tmp/harness-direct-commit.out 2>&1; then
-    echo "direct harness_commit should be blocked"
-    exit 1
-  fi
-  grep -q "direct harness_commit is blocked" /tmp/harness-direct-commit.out
   ./scripts/harness_publish.sh "feat(smoke): 스모크 검증" --dry-run
+  git switch main >/dev/null 2>&1 || git switch --orphan main >/dev/null
+  git add -A
+  HARNESS_ALLOW_MAIN_COMMIT=1 HARNESS_ALLOW_NO_PLAN=1 HARNESS_BYPASS_REASON="smoke test baseline" git commit -m "chore(smoke): 기준 커밋" >/dev/null
+  ./scripts/start_goal.sh "Smoke goal" >/dev/null
+  ./scripts/start_goal_unit.sh "Smoke goal unit" task/smoke-goal-unit "$tmp_root/smoke-goal-unit" >/dev/null
+  test -d "$tmp_root/smoke-goal-unit"
+  (
+    cd "$tmp_root/smoke-goal-unit"
+    printf 'goal unit\n' > goal-unit.txt
+    ./scripts/finish_goal_unit.sh "feat(smoke): goal unit 검증" >/dev/null
+  )
+  test ! -d "$tmp_root/smoke-goal-unit"
+  ! git show-ref --verify --quiet refs/heads/task/smoke-goal-unit
+  grep -q "\\[x\\].*task/smoke-goal-unit" docs/goals/active/*.md
+  ./scripts/harness_status.sh --goal | grep -q "active goal:"
+  ./scripts/finish_goal.sh "chore(smoke): goal 완료" >/dev/null
+  test -z "$(find docs/goals/active -maxdepth 1 -type f -name '*.md' -print 2>/dev/null)"
+  test -n "$(find docs/goals/completed -maxdepth 1 -type f -name '*.md' -print -quit)"
 )
 
 (

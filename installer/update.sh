@@ -81,15 +81,7 @@ harness_root="$harness_root"
 HARNESS_PROJECT_ROOT="\$repo_root" "\$harness_root/harness/scripts/verify.sh"
 WRAPPER
 
-  cat > "$target_root/scripts/harness_commit.sh" <<WRAPPER
-#!/usr/bin/env bash
-set -euo pipefail
-
-repo_root="\$(cd "\$(dirname "\$0")/.." && pwd)"
-harness_root="$harness_root"
-
-HARNESS_PROJECT_ROOT="\$repo_root" "\$harness_root/harness/scripts/harness_commit.sh" "\$@"
-WRAPPER
+  rm -f "$target_root/scripts/harness_commit.sh"
 
   cat > "$target_root/scripts/harness_status.sh" <<WRAPPER
 #!/usr/bin/env bash
@@ -105,6 +97,8 @@ WRAPPER
     bootstrap \
     create_run_artifact \
     create_worktree \
+    finish_goal \
+    finish_goal_unit \
     finish_codex_worktree_task \
     finish_codex_pr_task \
     finish_task \
@@ -116,6 +110,8 @@ WRAPPER
     install_git_hooks \
     open_pr \
     squash_merge_pr \
+    start_goal \
+    start_goal_unit \
     start_codex_worktree \
     start_task
   do

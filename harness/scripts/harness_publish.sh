@@ -59,7 +59,7 @@ python3 "$HARNESS_SCRIPT_DIR/check_commit_message.py" "$message_file"
 
 if [ "$dry_run" = "true" ]; then
   echo "dry run: git add -A"
-  echo "dry run: ./scripts/harness_commit.sh \"$message\""
+  echo "dry run: internal commit step \"$message\""
   if [ "$mode" = "pr" ]; then
     echo "dry run: ./scripts/open_pr.sh --base $base --remote $remote"
   else

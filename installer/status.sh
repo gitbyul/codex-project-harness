@@ -44,8 +44,11 @@ module_paths = {
         "scripts/bootstrap.sh",
         "scripts/create_run_artifact.sh",
         "scripts/create_worktree.sh",
+        "scripts/start_goal.sh",
+        "scripts/start_goal_unit.sh",
+        "scripts/finish_goal_unit.sh",
+        "scripts/finish_goal.sh",
         "scripts/verify.sh",
-        "scripts/harness_commit.sh",
         "scripts/harness_status.sh",
         "scripts/start_task.sh",
         "scripts/start_codex_worktree.sh",
@@ -64,7 +67,14 @@ module_paths = {
     "githooks": ["githooks/pre-commit", "githooks/commit-msg"],
     "github_workflows": [".github/workflows/verify.yml"],
     "generic_pm_skills": [".codex/skills/prd-development/SKILL.md"],
-    "docs_templates": ["docs/engineering/codex-skills.md"],
+    "docs_templates": [
+        "docs/engineering/codex-skills.md",
+        "docs/engineering/backend-mocking-rules.md",
+        "docs/engineering/frontend-mocking-rules.md",
+        "docs/engineering/development-quality-rules.md",
+        "docs/engineering/qa-test-strategy.md",
+        "docs/engineering/release-quality-gates.md",
+    ],
 }
 
 missing: list[str] = []
@@ -120,6 +130,51 @@ if hook_errors:
     print("- git hook installation issues:")
     for error in hook_errors:
         print(f"  - {error}")
+
+if check_mode == "--goal":
+    active_goals = sorted((target_root / "docs/goals/active").glob("*.md"))
+    active_plans = sorted((target_root / "docs/exec-plans/active").glob("*.md"))
+    try:
+        branch = subprocess.check_output(
+            ["git", "branch", "--show-current"],
+            cwd=target_root,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except subprocess.CalledProcessError:
+        branch = ""
+    print("goal workflow status:")
+    print(f"- current branch: {branch or '<unknown>'}")
+    if active_goals:
+        for goal in active_goals:
+            print(f"- active goal: {goal.relative_to(target_root)}")
+            for line in goal.read_text(encoding="utf-8", errors="ignore").splitlines():
+                if line.startswith("- ["):
+                    print(f"  {line}")
+    else:
+        print("- active goal: none")
+    if active_plans:
+        print("- active execution plans:")
+        for plan in active_plans:
+            print(f"  - {plan.relative_to(target_root)}")
+    else:
+        print("- active execution plans: none")
+
+if check_mode == "--qa":
+    quality_enabled = get_path(config, "quality.enabled")
+    quality_commands = get_path(config, "quality.commands")
+    required_sections = get_path(config, "quality.required_plan_sections")
+    if not isinstance(quality_commands, list):
+        quality_commands = [quality_commands] if quality_commands else []
+    print("QA workflow status:")
+    print(f"- quality enabled: {quality_enabled}")
+    print(f"- required plan sections: {required_sections}")
+    if quality_commands:
+        print("- quality commands:")
+        for command in quality_commands:
+            print(f"  - {command}")
+    else:
+        print("- quality commands: none")
 
 if check_mode == "--check" and status != "up-to-date":
     raise SystemExit(1)

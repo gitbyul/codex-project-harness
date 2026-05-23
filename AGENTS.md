@@ -22,7 +22,8 @@ This directory is the central source for shared Codex harness engineering and ge
 
 - Prefer `harness/scripts/start_task.sh` or an installed `./scripts/start_task.sh` before making non-trivial harness changes.
 - Finish work through high-level commands such as `finish_codex_worktree_task.sh`, `finish_codex_pr_task.sh`, or `harness_publish.sh` so execution plans, run artifacts, validation, push/PR or merge, branch cleanup, and worktree cleanup stay connected.
-- Treat `harness_commit.sh` as a low-level internal command. Direct use requires `HARNESS_ALLOW_DIRECT_COMMIT=1` and `HARNESS_BYPASS_REASON`.
+- Complete commit work through `finish_codex_worktree_task.sh`, `finish_codex_pr_task.sh`, or `harness_publish.sh` so verification, publication, merge, branch cleanup, and worktree cleanup stay in one flow.
+- For a large Codex goal, use `start_goal.sh`, `start_goal_unit.sh`, `finish_goal_unit.sh`, and `finish_goal.sh`; keep each unit small, start it from a clean main worktree, and do not begin the next unit until the previous unit has merged and cleaned up.
 - For remote delivery from a consuming project, prefer installed CLI wrappers such as `harness_publish.sh`, `harness_push.sh`, `finish_codex_pr_task.sh`, `open_pr.sh`, and `squash_merge_pr.sh` over plugin-only or skill-only flows.
 - Install/update/bootstrap must preserve the convention that new or initial repositories use `main` as the local primary branch. Existing non-initial project branch policies must not be renamed destructively.
 - Keep GitHub CLI setup available as an installed wrapper (`install_github_cli.sh`) with a dry-run mode; do not make network/package-manager installation mandatory during ordinary harness install.
